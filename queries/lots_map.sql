@@ -19,7 +19,8 @@ WITH us_states AS (
      )
 SELECT
     l.state_code,
-    COUNT(*) AS lots
+    COUNT(*) AS lots,
+    l.auction AS auction_type
 FROM locations_with_state l
          JOIN us_states s ON l.state_code = s.code
          JOIN car_sale_history ON l.id = car_sale_history.car_id
@@ -33,5 +34,5 @@ WHERE l.seller IS NOT NULL
   AND (:model IS NULL OR l.model = :model)
   AND car_sale_history.status = 'Sold'
   AND (:sale_start IS NULL OR :sale_end IS NULL OR car_sale_history.date BETWEEN :sale_start AND :sale_end)
-GROUP BY l.state_code
+GROUP BY l.state_code, l.auction
 ORDER BY lots DESC;
