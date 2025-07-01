@@ -15,7 +15,5 @@ params = {
 
 
 top_seller = run_query_from_file_with_params("queries/top_sellers.sql", params)
-all_sellers = run_query_without_params("queries/all.sql")
 print("Top sellers:", top_seller)
-# print("All sellers:", all_sellers)
 
