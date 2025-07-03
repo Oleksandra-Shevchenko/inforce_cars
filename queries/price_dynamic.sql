@@ -90,26 +90,35 @@ WITH us_states AS (
      )
 SELECT
     DATE_TRUNC('month', l.date) AS month,
-    ROUND(AVG(car_sale_history.final_bid), 2) AS avg_price
+    ROUND(AVG(sh.final_bid), 2) AS avg_price
 
 FROM locations_with_state l
-    JOIN us_states s ON locations_with_state.state_code = s.code
-    JOIN car_sale_history ON locations_with_state.id = car_sale_history.car_id
-WHERE car_sale_history.status= 'Sold'
-  AND seller IS NOT NULL
-  AND (:auctions IS NULL OR auction = ANY(:auctions))
-  AND (:auction_names IS NULL OR auction_name = ANY(:auction_names))
--- AND (:vehicle_condition IS NULL OR l.vehicle_condition = :vehicle_condition)
-  AND (:make IS NULL OR make = :make)
-  AND (:model IS NULL OR model = :model)
-  AND (:year_start IS NULL OR :year_end IS NULL OR year BETWEEN :year_start AND :year_end)
-  AND (:mileage_start IS NULL OR :mileage_end IS NULL OR mileage BETWEEN :mileage_start AND :mileage_end)
-  AND (:accident_start IS NULL OR :accident_end IS NULL OR accident_count BETWEEN :accident_start AND :accident_end)
-  AND (:owners_start IS NULL OR :owners_end IS NULL OR owners BETWEEN :owners_start AND :owners_end)
+         JOIN us_states s ON l.state_code = s.code
+         JOIN car_sale_history sh ON l.id = sh.car_id
+         JOIN condition_assessments ca ON l.id = ca.car_id
+
+WHERE seller IS NOT NULL
+  AND sh.status= 'Sold'
+  AND sh.final_bid IS NOT NULL
   AND (:state_codes IS NULL OR state_code = ANY(:state_codes))
   AND (:cities IS NULL OR city = ANY(:cities))
+  AND (:auctions IS NULL OR auction = ANY(:auctions))
+  AND (:mileage_start IS NULL OR :mileage_end IS NULL OR mileage BETWEEN :mileage_start AND :mileage_end)
+  AND (:owners_start IS NULL OR :owners_end IS NULL OR owners BETWEEN :owners_start AND :owners_end)
+  AND (:accident_start IS NULL OR :accident_end IS NULL OR accident_count BETWEEN :accident_start AND :accident_end)
+  AND (:year_start IS NULL OR :year_end IS NULL OR year BETWEEN :year_start AND :year_end)
+  AND (:vehicle_condition IS NULL OR ca.issue_description = ANY(:vehicle_condition))
   AND (:vehicle_types IS NULL OR vehicle_type = ANY(:vehicle_types))
-  AND (:sale_start IS NULL OR :sale_end IS NULL OR car_sale_history.date BETWEEN :sale_start AND :sale_end)
-
+  AND (:make IS NULL OR make = :make)
+  AND (:model IS NULL OR model = :model)
+  AND (:predicted_roi_start IS NULL OR :predicted_roi_end IS NULL OR predicted_roi BETWEEN :predicted_roi_start AND :predicted_roi_end)
+  AND (:predicted_profit_margin_start IS NULL OR :predicted_profit_margin_end IS NULL OR predicted_profit_margin BETWEEN :predicted_profit_margin_start AND :predicted_profit_margin_end)
+  AND (:engine_type IS NULL OR engine = ANY(:engine_type))
+  AND (:transmission IS NULL OR transmision = ANY(:transmission))
+  AND (:drive_train IS NULL OR drive_type = ANY(:drive_train))
+  AND (:cylinder IS NULL OR engine_cylinder = ANY(:cylinder))
+  AND (:auction_names IS NULL OR auction_name = ANY(:auction_names))
+  AND (:body_style IS NULL OR body_style = ANY(:body_style))
+  AND (:sale_start IS NULL OR :sale_end IS NULL OR sh.date BETWEEN :sale_start AND :sale_end)
 GROUP BY month
 ORDER BY month;
